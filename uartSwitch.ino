@@ -116,6 +116,7 @@ void handleSerial()
         if(Serial.available())
         {
           state = Serial.read(); 
+          Serial.write(RESULT_COMMAND);
         }
         break;
       }
