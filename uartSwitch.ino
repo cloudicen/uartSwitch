@@ -1,17 +1,20 @@
 //all input pin triggers while LOW!!!! and output HIGH!!!!
 
-//#define SELF_RECOVERY  //uncomment this if you are using a self recovery switch
+#define SELF_RECOVERY  //uncomment this if you are using a self recovery switch
 
 #define PIN_COUNT 8     //define the quantity of pins that used for IO
-#define BAUD 115200 //baud rate
+#define BAUD 9600 //baud rate
 /*
  * now you need to define the pin that used for input and out put
  * make sure the quantity of input pins and output pins are same, and also qual to 'pinCount' definded above!
  * this firmware support up to 8-way switch (8 pins for input and 8 pins for output)
  * because arduino nano only have 19 pins for io, and uart port need 2 pins to work. Also, states of 8 pins can be easily presented using 8bits(char or uint8_t) and esay for transmitting.
  */
-uint8_t inputPinList[] = {2, 3, 4, 5, 6, 7, 8, 9};    //maximum pin using in arduino uno/nano/pro mini/mini
-uint8_t outputPinList[] = {10,11,12,13,14,15,16,17};  //maximum pin using in arduino uno/nano/pro mini/mini
+//uint8_t inputPinList[] = {2, 3, 4, 5, 6, 7, 8, 9};    //maximum pin using in arduino uno/nano/pro mini/mini
+//uint8_t outputPinList[] = {10,11,12,13,14,15,16,17};  //maximum pin using in arduino uno/nano/pro mini/mini
+
+uint8_t inputPinList[] = {2, 3, 4, 5, 6, 7, 8, 9};    //maximum pin using in arduino PRO MICRO(need to set board model as arduino leodardo)
+uint8_t outputPinList[] = {A3,A2,A1,A0,15,14,16,10};  //maximum pin using in arduino PRO MICRO(need to set board model as arduino leodardo)
 
 //const uint8_t inputPinList[] = {0, 4, 5,10}; //maximum pin using in esp8266-12e nodemcu
 //const uint8_t outputPinList[] = {15, 13, 12, 14};//maximum pin using in esp8266-12e nodemcu
@@ -98,28 +101,19 @@ void writeState()
 void handleSerial()
 {
   uint8_t cmd;
-  if (Serial.available())
+  cmd = Serial.read();
+  if(cmd == QUERY_COMMAND)
   {
-    cmd = Serial.read();
+    Serial.write(RESULT_COMMAND);
+    Serial.write(state);
   }
-  switch (cmd)
+  else if(cmd == SET_COMMAND)
   {
-    case QUERY_COMMAND:
-      {
-        Serial.write(RESULT_COMMAND);
-        Serial.write(state);
-        break;
-      }
-    case SET_COMMAND:
-      {
-        delay(10);//wait for message
-        if(Serial.available())
-        {
-          state = Serial.read(); 
-          Serial.write(RESULT_COMMAND);
-        }
-        break;
-      }
-      Serial.flush();
+    delay(10);//wait for message
+    if(Serial.available())
+    {
+      state = Serial.read(); 
+      Serial.write(RESULT_COMMAND);
+    }
   }
 }
